@@ -3,11 +3,11 @@
 		<!-- Al pulsar refresca la página -->
 		<h1 @click="refreshPage" style="cursor: pointer;">{{ msg }}</h1>
 		<!-- A beautiful text input for the link to shorten-->
-		<div style="max-width: 15em; margin: 0 auto;">
+		<div style="max-width: 18em; margin: 0 auto;">
 			<input 
 				v-model="link" 
 				type="text"
-				placeholder="Enter your link here"
+				placeholder="Enter the link to shorten"
 				style="text-align: left;"
 				@keyup.enter="shortenLink"
 				:class="{'disabled-input': isShortened}"
@@ -28,9 +28,11 @@
 			<br>
 		</div>
 		<!-- Toast Notification -->
-		<div v-if="showToast" class="toast">
-			<p>{{ toastMessage }}</p>
-		</div>
+		<transition name="fade">
+			<div v-if="showToast" class="toast">
+				<p>{{ toastMessage }}</p>
+			</div>
+		</transition>
 	</div>
 </template>
 
@@ -46,6 +48,8 @@
 				isShortened: false, // Variable booleana para controlar la visibilidad
 				showToast: false, // Variable booleana para controlar la visibilidad de la notificación
 				toastMessage: "Link copied to clipboard!", // Mensaje de la notificación
+				toastOpacity: 0.8, // Opacidad de la notificación
+				toastDuration: 2000, // Duración de la notificación
 				errorFound: false // Variable booleana para controlar la visibilidad del mensaje de error
 			};
 		},
@@ -70,11 +74,10 @@
 				navigator.clipboard.writeText(this.link).then(() => {
 					console.log("Enlace copiado al portapapeles");
 					this.showToast = true; // Muestra la notificación
-
 					// Desaparece el toast después de 5 segundos
 					setTimeout(() => {
-						this.showToast = false; // Cambia la visibilidad a falsa después de 5 segundos
-					}, 3000); // 5000 ms = 5 segundos
+						this.showToast = false; // Oculta la notificación
+					}, this.toastDuration);					
 				}).catch((err) => {
 					console.error("Error al copiar al portapapeles: ", err);
 					this.errorFound = true; // Activa el flag de error
@@ -83,8 +86,8 @@
 
 					// Desaparece el toast después de 5 segundos
 					setTimeout(() => {
-						this.showToast = false; // Cambia la visibilidad a falsa después de 5 segundos
-					}, 3000); // 5000 ms = 5 segundos
+						this.showToast = false; // Oculta la notificación
+					}, this.toastDuration);
 				});
 			}
 		}
@@ -106,7 +109,6 @@
 	a {
 		color: #42b983;
 	}
-
 	/* Eliminar el borde del input */
 	input {
 		border: none;
@@ -116,34 +118,45 @@
 		width: 100%;
 		box-sizing: border-box;
 		color:#26704f;
-
+		font-family: 'Courier New', Courier, monospace;
+		/* input box is transparent */
+		background-color: transparent;
 	}
 	input::placeholder {
 		color: rgb(194, 24, 123);  /* Puedes cambiar 'purple' por cualquier color que prefieras */
 	}
 	.disabled-input {
 		/* Evitar cambios visuales al deshabilitar el input */
-		background-color: white; /* Fondo blanco */
+		background-color: transparent; /* Fondo transparente */
 		color: #42b983; /* Texto negro */
 	}
-
 	.toast {
 		position: fixed;
 		bottom: 20px;
 		left: 50%;
 		transform: translateX(-50%);
-		background-color: #333;
-		color: white;
+		background-color: #acda571c;
 		padding: 10px 20px;
 		border-radius: 5px;
 		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-		transition: opacity 2s ease-in-out;
-		opacity: 0.7;
+		transition: opacity 2.4s ease-out;
+		font-family: 'Courier New', Courier, monospace;
 	}
-
+	.fade-enter-active,
+	.fade-leave-active {
+		transition: opacity 0.5s ease-in-out;
+	}
+	.fade-enter-from,
+	.fade-leave-to {
+		opacity: 0; /* Empieza y termina con opacidad 0 */
+	}
+	.fade-enter-to,
+	.fade-leave-from {
+		opacity: 0.7; /* Totalmente visible */
+	}
 	/* A modern looking button with very soft borders and beautiful green colors not too much opacity */
 	button {
-		background-color: #acda571c;
+		background-color: #acda5736;
 		border-radius: 10%;
 		padding: 0.7em;
 		cursor: pointer;
@@ -152,8 +165,8 @@
 		/* Sin sombra inicial */
 		box-shadow: none;
 		transition: box-shadow 0.3s ease;  /* Transición suave para el borde */
+		font-family: 'Courier New', Courier, monospace;
 	}
-
 	/* Aparece el borde al hacer hover */
 	button:hover {
 		box-shadow: 0 0 5px 2px rgba(177, 196, 94, 0.3);  /* Sombra que simula un borde */
