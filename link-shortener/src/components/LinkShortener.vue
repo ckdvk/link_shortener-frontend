@@ -3,7 +3,7 @@
 		<!-- Al pulsar refresca la página -->
 		<h1 @click="refreshPage" style="cursor: pointer;">{{ msg }}</h1>
 		<!-- A beautiful text input for the link to shorten-->
-		<div style="max-width: 18em; margin: 0 auto;">
+		<div style="max-width: 17em; margin: 0 auto;">
 			<input 
 				v-model="link" 
 				type="text"
@@ -56,16 +56,64 @@
 		methods: {
 			// Método para refrescar la página
 			refreshPage() {
-				window.location.reload();
+				this.link = '';
+				this.isShortened = false;
+				this.showToast = false;
+				this.toastMessage = "Link copied to clipboard!";
+				this.errorFound = false;
 			},
 			// Método para simular la acción de acortar el enlace
 			shortenLink() {
-				// Aquí podrías agregar la lógica real para acortar el enlace
+				// // Aquí podrías agregar la lógica real para acortar el enlace
+				// if (this.link) {
+				// 	console.log("El usuario ha introducido el enlace: " + this.link);
+				// 	// Simulación de enlace acortado
+				// 	this.link = "http://localhost:8080/shortened-link"; // Se reemplaza el enlace largo por el acortado
+				// 	this.isShortened = true; // Activa el flag cuando el enlace es acortado
+				// }
 				if (this.link) {
-					console.log("El usuario ha introducido el enlace: " + this.link);
-					// Simulación de enlace acortado
-					this.link = "http://localhost:8080/shortened-link"; // Se reemplaza el enlace largo por el acortado
-					this.isShortened = true; // Activa el flag cuando el enlace es acortado
+					const token = localStorage.getItem('authToken'); // Obtener el token almacenado
+
+					if (!token) {
+						console.error("No token found. Please log in first.");
+						this.errorFound = true;
+						this.toastMessage = "You must be logged in to shorten links.";
+						this.showToast = true;
+						return;
+					}
+
+					fetch(`${this.API_URL}/shorten`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`,  // Incluir el token en la cabecera
+						},
+						body: JSON.stringify({ url: this.link })
+					})
+					.then(response => response.json())
+					.then(data => {
+						if (data.shortenedLink) {
+							this.link = data.shortenedLink;
+							this.isShortened = true;
+						} else {
+							console.error("Error shortening link:", data);
+							this.errorFound = true;
+							this.toastMessage = "Error shortening link.";
+							this.showToast = true;
+							setTimeout(() => {
+								this.showToast = false; // Oculta la notificación
+							}, this.toastDuration);
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						this.errorFound = true;
+						this.toastMessage = "Error shortening link.";
+						this.showToast = true;
+						setTimeout(() => {
+								this.showToast = false; // Oculta la notificación
+						}, this.toastDuration);
+					});
 				}
 			},
 			// Método para copiar el enlace al portapapeles

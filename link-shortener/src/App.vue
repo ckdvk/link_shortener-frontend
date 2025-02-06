@@ -22,7 +22,9 @@
 		},
 		data() {
 			return {
-			isAuthenticated: false // Controla si el usuario ha iniciado sesión
+				// isAuthenticated: false, // Controla si el usuario ha iniciado sesión
+				isAuthenticated: !!localStorage.getItem('authToken'), // Verificar si el token existe
+				API_URL: process.env.VUE_APP_API_URL,
 			};
 		},
 		methods: {
