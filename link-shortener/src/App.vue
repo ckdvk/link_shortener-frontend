@@ -1,11 +1,14 @@
 <template>
 	<div id="app">
+		<div v-if="isLoading"></div>
 		<transition name="fade" mode="out-in">
+			<!-- Lo primero de todo es chequear si hay token de autenticación. caso de que sí, le preguntamos al backend si está caducado o no. Si no, entramos. Si sí, vamos al login. Caso de que no, vamos al login -->
+
 			<!-- El key asegura que Vue detecte el cambio de componente -->
-			<UserLogin v-if="!isAuthenticated" @login-success="handleLoginSuccess" key="login" />
-			<LinkShortener v-else msg="Acorta er(pango.) link" key="linkshortener" />
-		</transition>
-		<!-- <UserLogin v-if="!isAuthenticated" @login-success="handleLoginSuccess" />
+			<UserLogin v-if="!isAuthenticated && !isLoading" @login-success="handleLoginSuccess" key="login" />
+			<LinkShortener v-if="isAuthenticated && !isLoading" msg="Acorta er(pango.) link" key="linkshortener" />
+			</transition>
+			<!-- <UserLogin v-if="!isAuthenticated" @login-success="handleLoginSuccess" />
 		<LinkShortener v-else msg="Acorta er(pango.) link" /> -->
 	</div>
 </template>
@@ -23,14 +26,57 @@
 		data() {
 			return {
 				// isAuthenticated: false, // Controla si el usuario ha iniciado sesión
-				isAuthenticated: !!localStorage.getItem('authToken'), // Verificar si el token existe
+				isAuthenticated: false, // Verificar si el token existe
+				isLoading: true,
 				API_URL: process.env.VUE_APP_API_URL,
 			};
 		},
 		methods: {
+			async checkTokenValidity() {
+				const token = localStorage.getItem('authToken');
+				if (!token) {
+					console.log('No token found');
+					this.isAuthenticated = false;
+					this.isLoading = false;
+					return;
+				}
+				try {
+					const response = await fetch(`${this.API_URL}/api/verify-token`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`
+						}
+					});
+
+					if (response.ok) {
+						console.log('Token válido');
+						this.isAuthenticated = true;
+					} else {
+						console.error('Token inválido');
+						// this.logout(); // Si el token es inválido, forzamos logout
+						this.isAuthenticated = false;
+					}
+				} catch (error) {
+					console.error('Error verificando el token:', error);
+					// this.logout();
+					this.isAuthenticated = false;
+				} finally {
+					this.isLoading = false;
+				}
+			},
+			logout() {
+				localStorage.removeItem('authToken');
+				this.isAuthenticated = false;
+			},
+			
 			handleLoginSuccess() {
 				this.isAuthenticated = true; // Cambia el estado tras el inicio de sesión exitoso
 			},
+		},
+		mounted() {
+			console.log('App mounted');
+			this.checkTokenValidity();
 		}
 	};
 </script>
@@ -50,15 +96,21 @@
 
 
 
-	/* 🎨 Animación de transición */
-.fade-enter-active, .fade-leave-active {
-	transition: opacity 0.5s ease;  /* Duración y suavidad */
-}
-.fade-enter-from, .fade-leave-to {
-	opacity: 0;  /* Inicio/fin transparente */
-}
-.fade-enter-to, .fade-leave-from {
-	opacity: 1;  /* Componente completamente visible */
-}
+		/* 🎨 Animación de transición */
+	.fade-enter-active, .fade-leave-active {
+		transition: opacity 0.5s ease;  /* Duración y suavidad */
+	}
+	.fade-enter-from, .fade-leave-to {
+		opacity: 0;  /* Inicio/fin transparente */
+	}
+	.fade-enter-to, .fade-leave-from {
+		opacity: 1;  /* Componente completamente visible */
+	}
+
+	* Estilo del indicador de carga */
+	#app div {
+		font-size: 1.5rem;
+		color: #888;
+	}
 </style>
 	
