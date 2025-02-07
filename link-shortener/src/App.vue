@@ -1,17 +1,16 @@
 <template>
 	<div id="app">
-		<div v-if="isLoading"></div>
+		<div v-if="isLoading">Cargando...</div>
+		<!-- El key asegura que Vue detecte el cambio de componente -->
 		<transition name="fade" mode="out-in">
-			<!-- Lo primero de todo es chequear si hay token de autenticación. caso de que sí, le preguntamos al backend si está caducado o no. Si no, entramos. Si sí, vamos al login. Caso de que no, vamos al login -->
-
-			<!-- El key asegura que Vue detecte el cambio de componente -->
-			<UserLogin v-if="!isAuthenticated && !isLoading" @login-success="handleLoginSuccess" key="login" />
-			<LinkShortener v-if="isAuthenticated && !isLoading" msg="Acorta er(pango.) link" key="linkshortener" />
-			</transition>
-			<!-- <UserLogin v-if="!isAuthenticated" @login-success="handleLoginSuccess" />
-		<LinkShortener v-else msg="Acorta er(pango.) link" /> -->
+			<div>
+				<UserLogin v-if="!isAuthenticated && !isLoading" @login-success="handleLoginSuccess" key="login" />
+				<LinkShortener v-if="isAuthenticated && !isLoading" msg="Acorta er(pango.) link" key="linkshortener" />
+			</div>
+		</transition>
 	</div>
 </template>
+
 
 <script>
 	import UserLogin from './components/UserLogin.vue';

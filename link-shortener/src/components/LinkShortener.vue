@@ -1,5 +1,5 @@
 <template>
-	<div class="hello">
+	<div class="shorten">
 		<!-- Al pulsar refresca la página -->
 		<h1 @click="refreshPage" style="cursor: pointer;">{{ msg }}</h1>
 		<!-- A beautiful text input for the link to shorten-->
@@ -8,7 +8,6 @@
 				v-model="link" 
 				type="text"
 				placeholder="Enter the link to shorten"
-				style="text-align: left;"
 				@keyup.enter="shortenLink"
 				:class="{'disabled-input': isShortened}"
 				:disabled="isShortened"
@@ -50,7 +49,8 @@
 				toastMessage: "Link copied to clipboard!", // Mensaje de la notificación
 				toastOpacity: 0.8, // Opacidad de la notificación
 				toastDuration: 2000, // Duración de la notificación
-				errorFound: false // Variable booleana para controlar la visibilidad del mensaje de error
+				errorFound: false, // Variable booleana para controlar la visibilidad del mensaje de error
+				API_URL: process.env.VUE_APP_API_URL,
 			};
 		},
 		methods: {
@@ -64,6 +64,8 @@
 			},
 			// Método para simular la acción de acortar el enlace
 			shortenLink() {
+				// console.log(`URL DE LA API: ${process.env.VUE_APP_API_URL}`); // Esto debería mostrar la URL base que configuraste
+
 				// // Aquí podrías agregar la lógica real para acortar el enlace
 				// if (this.link) {
 				// 	console.log("El usuario ha introducido el enlace: " + this.link);
@@ -82,18 +84,19 @@
 						return;
 					}
 
-					fetch(`${this.API_URL}/shorten`, {
+					fetch(`${this.API_URL}/shortenUrl`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 							'Authorization': `Bearer ${token}`,  // Incluir el token en la cabecera
 						},
-						body: JSON.stringify({ url: this.link })
+						body: JSON.stringify({ original_url: this.link })
 					})
 					.then(response => response.json())
 					.then(data => {
-						if (data.shortenedLink) {
-							this.link = data.shortenedLink;
+						if (data.short_url) {
+							this.link = data.short_url;
+							console.log("Link shortened:", this.link);
 							this.isShortened = true;
 						} else {
 							console.error("Error shortening link:", data);
@@ -169,15 +172,20 @@
 		font-family: 'Courier New', Courier, monospace;
 		/* input box is transparent */
 		background-color: transparent;
+		text-align: left;
+	}
+	.disabled-input {
+		/* Evitar cambios visuales al deshabilitar el input, además, el texto se ve centrado ahora */
+		background-color: transparent; /* Fondo transparente */
+		color: #42b983; /*Texto verde */
+		text-align: center;
 	}
 	input::placeholder {
 		color: rgb(194, 24, 123);  /* Puedes cambiar 'purple' por cualquier color que prefieras */
 	}
-	.disabled-input {
-		/* Evitar cambios visuales al deshabilitar el input */
-		background-color: transparent; /* Fondo transparente */
-		color: #42b983; /* Texto negro */
-	}
+
+
+
 	.toast {
 		position: fixed;
 		bottom: 20px;
