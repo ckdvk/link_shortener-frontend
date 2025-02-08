@@ -87,13 +87,14 @@
 		-moz-osx-font-smoothing: grayscale;
 		text-align: center;
 		color: #2c3e50;
-		margin-top: 60px;
+		/* margin-top: 60px; */
+		/* the div is almost centered vertically on the screen, but it is a bit above the center */
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 80vh;
 	}
-
-
-
-
-
 
 		/* 🎨 Animación de transición */
 	.fade-enter-active, .fade-leave-active {
