@@ -46,19 +46,11 @@ export default {
 	},
 	methods: {
 		login() {
-			// if (this.username === 'user' && this.password === 'password') {
-			// 	this.isAuthenticated = true;
-			// 	this.$emit('login-success');
-			// 	this.errorMessage = '';
-			// } else {
-			// 	this.errorMessage = 'Invalid username or password';
-			// }
 			const data = {
 				username: this.username,
 				password: this.password,
 			};
-			// Petición al backend para obtener el token
-			fetch(`${this.API_URL}/login`, {
+			fetch(`${this.API_URL}/api/userRoutes/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -68,7 +60,7 @@ export default {
 			.then(response => response.json())
 			.then(data => {
 				if (data.token) {
-					localStorage.setItem('authToken', data.token); // Guardar el token
+					localStorage.setItem('authToken', data.token);
 					this.isAuthenticated = true;
 					this.$emit('login-success');
 					this.errorMessage = '';
@@ -121,7 +113,7 @@ input {
 	background-color: transparent;
 }
 input::placeholder {
-		color: rgb(194, 24, 123);  /* Puedes cambiar 'purple' por cualquier color que prefieras */
+		color: rgb(194, 24, 123);
 		text-align: left;
 	}
 
@@ -131,7 +123,6 @@ input::placeholder {
 }
 
 button {
-	/* background-color: #acda5736; */
 	background-color: transparent;
 	border-radius: 10%;
 	padding: 0.7em;
@@ -144,7 +135,6 @@ button {
 }
 
 button:hover {
-	/* box-shadow: 0 0 5px 2px rgba(177, 196, 94, 0.3); */
 	color: rgb(194, 24, 123);
 }
 

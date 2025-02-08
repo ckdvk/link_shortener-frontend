@@ -1,16 +1,14 @@
 <template>
 	<div id="app">
 		<div v-if="isLoading">Cargando...</div>
-		<!-- El key asegura que Vue detecte el cambio de componente -->
 		<transition name="fade" mode="out-in">
 			<div>
 				<UserLogin v-if="!isAuthenticated && !isLoading" @login-success="handleLoginSuccess" key="login" />
-				<LinkShortener v-if="isAuthenticated && !isLoading" msg="Acorta er(pango.) link" key="linkshortener" />
+				<LinkShortener v-if="isAuthenticated && !isLoading" msg="Shorten your link" key="linkshortener" />
 			</div>
 		</transition>
 	</div>
 </template>
-
 
 <script>
 	import UserLogin from './components/UserLogin.vue';
@@ -24,8 +22,7 @@
 		},
 		data() {
 			return {
-				// isAuthenticated: false, // Controla si el usuario ha iniciado sesión
-				isAuthenticated: false, // Verificar si el token existe
+				isAuthenticated: false,
 				isLoading: true,
 				API_URL: process.env.VUE_APP_API_URL,
 			};
@@ -40,7 +37,7 @@
 					return;
 				}
 				try {
-					const response = await fetch(`${this.API_URL}/api/verify-token`, {
+					const response = await fetch(`${this.API_URL}/api/tokenRoutes/verify-token`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -53,24 +50,17 @@
 						this.isAuthenticated = true;
 					} else {
 						console.error('Token inválido');
-						// this.logout(); // Si el token es inválido, forzamos logout
 						this.isAuthenticated = false;
 					}
 				} catch (error) {
 					console.error('Error verificando el token:', error);
-					// this.logout();
 					this.isAuthenticated = false;
 				} finally {
 					this.isLoading = false;
 				}
 			},
-			logout() {
-				localStorage.removeItem('authToken');
-				this.isAuthenticated = false;
-			},
-			
 			handleLoginSuccess() {
-				this.isAuthenticated = true; // Cambia el estado tras el inicio de sesión exitoso
+				this.isAuthenticated = true;
 			},
 		},
 		mounted() {
@@ -87,8 +77,6 @@
 		-moz-osx-font-smoothing: grayscale;
 		text-align: center;
 		color: #2c3e50;
-		/* margin-top: 60px; */
-		/* the div is almost centered vertically on the screen, but it is a bit above the center */
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -96,15 +84,14 @@
 		height: 80vh;
 	}
 
-		/* 🎨 Animación de transición */
 	.fade-enter-active, .fade-leave-active {
-		transition: opacity 0.5s ease;  /* Duración y suavidad */
+		transition: opacity 0.5s ease;
 	}
 	.fade-enter-from, .fade-leave-to {
-		opacity: 0;  /* Inicio/fin transparente */
+		opacity: 0;
 	}
 	.fade-enter-to, .fade-leave-from {
-		opacity: 1;  /* Componente completamente visible */
+		opacity: 1;
 	}
 
 	* Estilo del indicador de carga */
